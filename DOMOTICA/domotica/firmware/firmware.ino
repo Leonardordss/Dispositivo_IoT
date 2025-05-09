@@ -1,12 +1,12 @@
 #include <WiFi.h>
-#include <HTTPCLient.h>
+#include <HTTPClient.h>
 #include <ArduinoJson.h>
 
 const char* ssid = "Wokwi-GUEST";
 const char* password = "";
 
 const char* contentfulURL = "https://cdn.contentful.com/spaces/yn1fkqj49xrw/environments/master/entries?content_type=device&select=fields.pin,fields.state";
-const char* acessToken = "Bearer ";
+const char* accessToken = "Bearer ";
 
 unsigned long timerScan = 0;
 #define SCAN_DELAY 3000
@@ -44,10 +44,10 @@ void scanRoutine(){
 
     if(httpResponseStatus > 0){
         String response = http.getString();
-        
-        const int responseSize = response.length() *1.1; 
+
+        const int responseSize = response.length() * 1.1;        
         DynamicJsonDocument json(responseSize);
-        deserializeJson(Json,response);
+        deserializeJson(json,response);
 
         JsonArray items = json["items"];
 
@@ -55,17 +55,16 @@ void scanRoutine(){
             int pin = item["fields"]["pin"] | -1;
             bool state = item["fields"]["state"] | false;
 
-             if(pin > 0 ){
+            if(pin > 0 ){
                 pinMode(pin, OUTPUT);
                 digitalWrite(pin, state);
                 Serial.printf("\n PIN: %d, STATE: %s", pin, state? "ON":"OFF");                
             }
-
         }
 
     }
     else{
-        Seria.printf("\n Error when calling backend: %d \n",httpResponseStatus);
+        Serial.printf("\n Error when calling backend: %d \n",httpResponseStatus);
     }
 
 }
